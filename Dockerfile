@@ -1,7 +1,9 @@
 FROM python:3
 USER root
 
-RUN apt-get update && pip install --upgrade pip
+RUN apt-get update && \
+    pip install --upgrade pip && \
+    pip install setuptools
 
 COPY . /root/msk-client/
 
