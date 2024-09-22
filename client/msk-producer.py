@@ -9,7 +9,7 @@ from confluent_kafka import Producer
 config = configparser.ConfigParser()
 
 #設定ファイル読み込み
-config.read('./config.ini')
+config.read('../config/config.ini')
 
 # MSK 認証トークンを取得
 def get_oauth_cb(oauth_config):
