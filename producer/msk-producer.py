@@ -4,7 +4,7 @@ from random import choice
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 from confluent_kafka import Producer
 
-import config
+from config import config
 
 region = config.REGION
 bootstrap_server = config.BOOTSTRAP_SERVERS

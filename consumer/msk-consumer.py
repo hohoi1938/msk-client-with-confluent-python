@@ -3,7 +3,7 @@ import socket
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 from confluent_kafka import Consumer
 
-import config
+from config import config
 
 region = config.REGION
 bootstrap_server = config.BOOTSTRAP_SERVERS
