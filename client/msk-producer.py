@@ -1,29 +1,31 @@
-import configparser
 import socket
 from random import choice
 
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 from confluent_kafka import Producer
 
-# ConfigParser オブジェクトを生成
-config = configparser.ConfigParser()
+import config
 
-#設定ファイル読み込み
-config.read('../config/config.ini')
+region = config.REGION
+bootstrap_server = config.BOOTSTRAP_SERVERS
+security_protocol = config.SECURITY_PROTOCOL
+sasl_mechanism = config.SASL_MECHANISM
+acks = config.ACKS
+topic = config.TOPIC
 
 # MSK 認証トークンを取得
 def get_oauth_cb(oauth_config):
-    auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(config['DEFAULT']['REGION'])
+    auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
     return auth_token, expiry_ms/1000
 
 if __name__ == '__main__':
     print("Producer Started")
 
     producer_config = {
-        'bootstrap.servers': config['DEFAULT']['BOOTSTRAP_SERVERS'],
-        'security.protocol': config['DEFAULT']['SECURITY_PROTOCOL'],
-        'sasl.mechanisms':   config['DEFAULT']['SASL_MECHANISM'],
-        'acks': config['PRODUCER']['ACKS'],
+        'bootstrap.servers': bootstrap_server,
+        'security.protocol': security_protocol,
+        'sasl.mechanisms': sasl_mechanism,
+        'acks': acks,
         'oauth_cb': get_oauth_cb,
         'client.id': socket.gethostname()
     }
@@ -38,9 +40,6 @@ if __name__ == '__main__':
         else:
             print("Produced event to topic {topic}: key = {key:12} value = {value:12}".format(
                 topic=msg.topic(), key=msg.key().decode('utf-8'), value=msg.value().decode('utf-8')))
-
-    # 書き込み先のトピックを指定
-    topic = config['DEFAULT']['TOPIC']
 
     # サンプルメッセージデータ定義
     user_ids = ['eabara', 'jsmith', 'sgarcia', 'jbernard', 'htanaka', 'awalther']

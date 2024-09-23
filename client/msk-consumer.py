@@ -1,29 +1,32 @@
-import configparser
 import socket
 
 from aws_msk_iam_sasl_signer import MSKAuthTokenProvider
 from confluent_kafka import Consumer
 
-# ConfigParser オブジェクトを生成
-config = configparser.ConfigParser()
+import config
 
-#設定ファイル読み込み
-config.read('../config/config.ini')
+region = config.REGION
+bootstrap_server = config.BOOTSTRAP_SERVERS
+security_protocol = config.SECURITY_PROTOCOL
+sasl_mechanism = config.SASL_MECHANISM
+group_id = config.GROUP_ID
+auto_offset_reset = config.AUTO_OFFSET_RESET
+topic = config.TOPIC
 
 # MSK 認証トークンを取得
 def get_oauth_cb(oauth_config):
-    auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(config['DEFAULT']['REGION'])
+    auth_token, expiry_ms = MSKAuthTokenProvider.generate_auth_token(region)
     return auth_token, expiry_ms/1000
 
 if __name__ == '__main__':
 
     print("Consumer Started")
     consumer_config = {
-        'bootstrap.servers': config['DEFAULT']['BOOTSTRAP_SERVERS'],
-        'security.protocol': config['DEFAULT']['SECURITY_PROTOCOL'],
-        'sasl.mechanisms':   config['DEFAULT']['SASL_MECHANISM'],
-        'group.id':          config['CONSUMER']['GROUP_ID'],
-        'auto.offset.reset': config['CONSUMER']['AUTO_OFFSET_RESET'],
+        'bootstrap.servers': bootstrap_server,
+        'security.protocol': security_protocol,
+        'sasl.mechanisms': sasl_mechanism,
+        'group.id': group_id,
+        'auto.offset.reset': auto_offset_reset,
         'oauth_cb': get_oauth_cb,
         'client.id': socket.gethostname()
     }
@@ -32,7 +35,6 @@ if __name__ == '__main__':
     consumer = Consumer(consumer_config)
 
     # トピックをサブスクライブ
-    topic = config['DEFAULT']['TOPIC']
     consumer.subscribe([topic])
 
     # メッセージをポーリング
